@@ -8,7 +8,7 @@
             - PB13: Push Button for Spool Change
             - PB15: Push Button for Fast Forward Winder Motor
             - PB12: Push Button for Start/Stop both Motors
-            - PA1: Proximity Sensor
+            - PA9: Proximity Sensor
             - PB6: I2C SCL
             - PB7: I2C SDA
             - PA11: USB -ve Line
@@ -22,17 +22,16 @@ use hal::{
     gpio,
 };
 
-
 pub struct PinAssignments {
-    pub winder_motor_pulse: gpio::gpioa::PA3<gpio::Output<gpio::PushPull>>,
+    pub winder_motor_pulse: gpio::gpioa::PA3<gpio::Alternate<gpio::PushPull>>,
     pub winder_motor_direction: gpio::gpioa::PA4<gpio::Output<gpio::PushPull>>,
-    pub linear_guide_motor_pulse: gpio::gpiob::PB1<gpio::Output<gpio::PushPull>>,
+    pub linear_guide_motor_pulse: gpio::gpiob::PB1<gpio::Alternate<gpio::PushPull>>,
     pub linear_guide_motor_direction: gpio::gpiob::PB10<gpio::Output<gpio::PushPull>>,
     pub winder_motor_reverse: gpio::gpiob::PB14<gpio::Input<gpio::PullUp>>,
     pub spool_change: gpio::gpiob::PB13<gpio::Input<gpio::PullUp>>,
     pub fast_forward: gpio::gpiob::PB15<gpio::Input<gpio::PullUp>>,
     pub start_stop: gpio::gpiob::PB12<gpio::Input<gpio::PullUp>>,
-    pub proximity_sensor: gpio::gpioa::PA1<gpio::Input<gpio::PullUp>>,
+    pub proximity_sensor: gpio::gpioa::PA9<gpio::Input<gpio::PullUp>>,
     pub i2c_scl: gpio::gpiob::PB6<gpio::Alternate<gpio::OpenDrain>>,
     pub i2c_sda: gpio::gpiob::PB7<gpio::Alternate<gpio::OpenDrain>>,
     // pub usb_neg: gpio::gpioa::PA11<gpio::Input<gpio::PullUp>>,
@@ -61,15 +60,15 @@ impl AssignPins for PinAssignments {
         let mut gpiob = gpiob;
         let mut gpioc = gpioc;
         Self {
-            winder_motor_pulse: gpioa.pa3.into_push_pull_output(&mut gpioa.crl),
+            winder_motor_pulse: gpioa.pa3.into_alternate_push_pull(&mut gpioa.crl),
             winder_motor_direction: gpioa.pa4.into_push_pull_output(&mut gpioa.crl),
-            linear_guide_motor_pulse: gpiob.pb1.into_push_pull_output(&mut gpiob.crl),
+            linear_guide_motor_pulse: gpiob.pb1.into_alternate_push_pull(&mut gpiob.crl),
             linear_guide_motor_direction: gpiob.pb10.into_push_pull_output(&mut gpiob.crh),
             winder_motor_reverse: gpiob.pb14.into_pull_up_input(&mut gpiob.crh),
             spool_change: gpiob.pb13.into_pull_up_input(&mut gpiob.crh),
             fast_forward: gpiob.pb15.into_pull_up_input(&mut gpiob.crh),
             start_stop: gpiob.pb12.into_pull_up_input(&mut gpiob.crh),
-            proximity_sensor: gpioa.pa1.into_pull_up_input(&mut gpioa.crl),
+            proximity_sensor: gpioa.pa9.into_pull_up_input(&mut gpioa.crh),
             i2c_scl: gpiob.pb6.into_alternate_open_drain(&mut gpiob.crl),
             i2c_sda: gpiob.pb7.into_alternate_open_drain(&mut gpiob.crl),
             led: gpioc.pc13.into_push_pull_output(&mut gpioc.crh),
