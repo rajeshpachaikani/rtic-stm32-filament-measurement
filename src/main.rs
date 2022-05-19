@@ -43,8 +43,8 @@ mod app {
     use core::{f32::consts::PI,
                fmt::Write,
     };
-    use cortex_m::asm;
-    use cortex_m_semihosting::hprintln;
+
+
     use heapless::String;
     use panic_semihosting as _;
     use hal::
@@ -70,8 +70,7 @@ mod app {
         },
         adc::{Adc},
     };
-    use hal::gpio::{PA4, PB1, PB10};
-    use hal::pac::TIM3;
+    use hal::gpio::{PA4, PB10};
     use hal::timer::{
         Channel,
         PwmHz,
@@ -79,7 +78,7 @@ mod app {
         Tim3NoRemap,
         Timer,
     };
-    use lcd_lcm1602_i2c::Lcd;
+
     use rtic::mutex_prelude::TupleExt02;
     use crate::{
         FILAMENT_LENGTH_PULSE,
@@ -271,13 +270,13 @@ mod app {
             _clocks,
         );
 
-        let mut speed_control = SpeedControl {
+        let speed_control = SpeedControl {
             winder_motor_speed: all_pins.winder_motor_speed,
             linear_guide_motor_speed: all_pins.linear_guide_motor_speed,
-            adc: adc,
+            adc,
         };
 
-        let mut direction_pins = DirectionPins {
+        let direction_pins = DirectionPins {
             winder_motor_direction: all_pins.winder_motor_direction,
             linear_guide_motor_direction: all_pins.linear_guide_motor_direction,
         };
@@ -413,10 +412,10 @@ mod app {
     fn idle(cx: idle::Context) -> ! {
         let i2c = cx.local.i2c;
         let delay = cx.local.delay;
-        let led: &mut PC13<Output<PushPull>> = cx.local.led;
+        let _led: &mut PC13<Output<PushPull>> = cx.local.led;
         let speed_control: &mut SpeedControl = cx.local.speed_control;
         let winder_motor_speed_adc = &mut speed_control.winder_motor_speed;
-        let linear_guide_speed_adc = &mut speed_control.linear_guide_motor_speed;
+        let _linear_guide_speed_adc = &mut speed_control.linear_guide_motor_speed;
         let adc = &mut speed_control.adc;
         let linear_guide_pulse : &mut PwmHz<
             hal::pac::TIM3,
@@ -436,25 +435,29 @@ mod app {
             .init()
             .unwrap();
         lcd.clear().unwrap();
-        let mut past: u64 = monotonics::now().ticks();
-        let mut adc_event_time: u64 = 0;
+        let mut _past: u64 = monotonics::now().ticks();
+        let adc_event_time: u64 = 0;
         let mut winder_speed: u16 = 0;
-        let mut linear_guide_speed: u16 = 0;
+        let _linear_guide_speed: u16 = 0;
         let mut lcd_string: String<16> = String::new();
         lcd.set_cursor(0, 2).unwrap();
         lcd.write_str("makeitnow.in" ).unwrap();
 
         loop {
             // Poll for ADC update every 100ms
+            if (monotonics::now().ticks() - _past) > 100000{
+                _led.toggle();
+                _past = monotonics::now().ticks();
+            }
             if (monotonics::now().ticks() - adc_event_time) > 10000 {
                 let ws_temp:u16 =  adc.read(winder_motor_speed_adc).unwrap();
                 if winder_speed.abs_diff(ws_temp) > 200 {
                     winder_speed = ws_temp;
-                    let speed = map_value(winder_speed, 100,3900, 0, 380);
-                    let pulse_count = get_pulse_count(speed as u32, 8);
+                    let speed = map_value(winder_speed, 100,3900, 0, 1500);
+                    let pulse_count = get_pulse_count(speed as u32, 1);
                     lcd.clear().unwrap();
                     lcd.set_cursor(0, 0).unwrap();
-                    write!(&mut lcd_string, "PC:{}", pulse_count).unwrap();
+                    write!(&mut lcd_string, "RPM:{}", speed).unwrap();
                     lcd.write_str(lcd_string.as_str()).unwrap();
                     lcd_string.clear();
                     if pulse_count < 10{

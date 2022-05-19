@@ -18,7 +18,6 @@
             - PA2: Linear guide limit switch
  */
 use hal::{
-    prelude::*,
     gpio,
 };
 

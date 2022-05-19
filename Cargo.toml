@@ -17,9 +17,19 @@ lcd-lcm1602-i2c = "0.1.0"
 heapless = "0.7.12"
 alloc-cortex-m = "0.4.2"
 
+[[bin]]
+name = "rtic-stm32-filament-measurement"
+test = false
+bench = false
 
 [profile.dev]
 codegen-units = 1
 debug = 0
 lto = true
 opt-level = "z"
+
+[profile.release]
+opt-level = "s"   # optimize for size
+codegen-units = 1 # better optimizations
+debug = true      # symbols are nice and they don't increase the size on Flash
+lto = true        # better optimizations
